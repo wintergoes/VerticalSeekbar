@@ -116,6 +116,12 @@ public class VerticalSeekbar extends View {
         if(a.hasValue(R.styleable.VerticalSeekbar_drawableBar)){
             mBar = a.getDrawable(R.styleable.VerticalSeekbar_drawableBar);
             mBar.setCallback(this);
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                mBar = mContext.getDrawable(R.drawable.default_bar);
+            } else {
+                mBar = mContext.getResources().getDrawable(R.drawable.default_bar);
+            }
         }
 
         a.recycle();
