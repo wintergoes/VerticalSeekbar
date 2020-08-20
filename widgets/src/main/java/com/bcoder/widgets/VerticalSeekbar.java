@@ -229,14 +229,20 @@ public class VerticalSeekbar extends View {
                         mThumbDown = false;
                     }
 
-                    if(event.getY() > 0 && event.getY() < getHeight() - getPaddingBottom() - getThumbHeight()) {
-                        int contentHeight = getHeight() - getPaddingTop() - getPaddingBottom() - getThumbHeight() ;
-                        mValue = (int) ((contentHeight - event.getY()) * (mMax - mMin + 1) / contentHeight);
-                        if (mOnValueChanged != null){
-                            mOnValueChanged.onValueChange(mValue);
-                        }
-                        invalidate();
+                    int tmpY = (int) event.getY();
+                    if(event.getY() < 0){
+                        tmpY = 0;
                     }
+                    if(event.getY() > getHeight() - getPaddingBottom() - getThumbHeight()){
+                        tmpY = getHeight() - getPaddingBottom() - getThumbHeight();
+                    }
+
+                    int contentHeight = getHeight() - getPaddingTop() - getPaddingBottom() - getThumbHeight() ;
+                    mValue = (int) ((contentHeight - tmpY) * (mMax - mMin ) / contentHeight);
+                    if (mOnValueChanged != null){
+                        mOnValueChanged.onValueChange(mValue);
+                    }
+                    invalidate();
 
                     return true;
                 }
