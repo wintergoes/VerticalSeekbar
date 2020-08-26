@@ -1,4 +1,28 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+group = "bcoder.com"
+version = "1.0.0"
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+//read bintray.user from local.properties
+def bintrayUser = properties.getProperty("bintray.user")
+//read bintray.apikey from local.properties
+def bintrayKey = properties.getProperty("bintray.apikey")
+
+
+def siteUrl = 'https://github.com/wintergoes/VerticalSeekbar'
+def gitUrl = 'https://github.com/wintergoes/VerticalSeekbar.git'
+//library name on jCenter
+def libName = "VerticalSeekbar"
+def javaDocLinks = "https://github.com/wintergoes/VerticalSeekbar/wiki"
+//Repository name in Bintray
+def bintrayRepo = "VerticalSeekbar"
+//应用的描述
+def bintrayDesc = "Vertical Seekbar componment for android"
+
 
 android {
     compileSdkVersion 29
@@ -8,7 +32,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 29
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -29,4 +53,90 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    //以下两个为项目中带有中文注释的支持
+    options.encoding "UTF-8"
+    options.charSet 'UTF-8'
+    options.author true
+    options.version true
+    options.links javaDocLinks
+    failOnError false
+}
+
+//java doc 2 jar?
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+//copy javadoc files
+task copyDoc(type: Copy) {
+    from "${buildDir}/docs/"
+    into "docs"
+}
+
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+                //项目名称和描述
+                name 'VerticalSeekbar'
+                description 'Vertical Seekbar for android'
+                url siteUrl
+                licenses {
+                    license {
+                        //开源协议,在bintray中创建仓库时选择的license为Apache-2.0，复制下面的就可以
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    //开发者的个人信息
+                    developer {
+                        id 'wintergoes'
+                        name 'wintergoes'
+                        email 'wintergoes@gmail.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+
+bintray {
+    user = bintrayUser
+    key = bintrayKey
+    configurations = ['archives']
+    pkg {
+        repo = bintrayRepo
+        name = libName
+        desc =  bintrayDesc
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["Apache-2.0"]
+        publish = true
+    }
 }
